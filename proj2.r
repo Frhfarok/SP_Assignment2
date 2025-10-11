@@ -2,7 +2,7 @@
 #  Group 18 Members and Contributions:
 
 #  Farah Nur Jannah Binti Farok (S2891743): Sections 1 and 2
-#  Marta Gorecka (S1866561): 
+#  Marta Gorecka (S1866561): Sections 2 & 3
 #  Farell Zevic (S2810226): 
 ############################################################
 
@@ -25,13 +25,19 @@ get.net <- function(beta, h, nc = 15) {
   # beta = 
   #
   #
-  bm <- mean(beta)
   n <- length(beta) # total number of people
+  bm <- mean(beta) # mean of vector beta
   contacts <- vector("list", n) # create empty list for each person
   
   for (i in 1:n) {
     non_household <- which(h != h[i]) # identify people NOT in the same household as person i
-    contacts[[i]] <- sample(non_household, nc) # sample nc contacts from non_household population
+    
+    probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1)) # probability links
+    isampled <- runif(length(non_household)) < probij # randomly sample which non-householders to pick
+    sampled <- non_household[isampled] # sampled non-householders
+    contacts[i] <- sampled
+    #contacts[[i]] <- sample(non_household, nc, probij) # sample contacts from non_household population with probability probij
+    
     }
   
   # make the link bidirectional
@@ -53,6 +59,7 @@ get.net <- function(beta, h, nc = 15) {
 # beta = n vector of βi; nt = number of days to simulate 
 # pinf = proportion of the initial population to *randomly* start in th eI state
 
+## NOT FINISHED, To Be Completed
 alink = get.net(beta, h, nc = 15) # non-household contacts
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
   
@@ -63,6 +70,7 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
   S <- E <- I <- R <- rep(0,nt) ## set up storage for pop in each state
   S[1] <- n-ni; I[1]<-ni
   
+  # from LECTURE NOTES for inspiration
   for (i in 2:nt) { ## loop over days
     u <- runif(n) ## uniform random deviates
     x[x==2 & u < delta] <- 3 ## I -> R with prob delta
