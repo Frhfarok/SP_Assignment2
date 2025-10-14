@@ -32,12 +32,8 @@ get.net <- function(beta, h, nc = 15) {
     probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1)) # probability links
     isampled <- runif(length(non_household)) < probij # randomly sample which non-householders to pick
     sampled <- non_household[isampled] # sampled non-householders
-    }
     contacts[[i]] <- sampled
-    #contacts[[i]] <- sample(non_household, nc, probij) # sample contacts from non_household population with probability probij
-  }
-
-  
+    }
   # make the link bidirectional
   # ensure if person i lists person j as a contact, then person j also lists person i as a contact
   for (i in 1:n) {
@@ -58,29 +54,28 @@ get.net <- function(beta, h, nc = 15) {
 # pinf = proportion of the initial population to *randomly* start in the I state
 
 ## NOT FINISHED, To Be Completed
-alink = get.net(beta, h, nc = 15) # non-household contacts
+alink <- get.net(beta, h, nc = 15) # non-household contacts
 
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
-
-  
   # calculate combined infection rate using alpha
-  for (i in 1:n){
-    probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
-    probij_h <- alpha[1]*probij
-    probij_c <- alpha[2]*probij
-    probij_r <- alpha[3]*probij
-    
-    
-  }
-
-  n<-length(beta)
-  x<-rep(0L,n) # vector x to store the infection state
+  
+  bm <- mean(beta)
+  n <- length(beta)
+  x <- rep(0,n) # vector x to store the infection state
   ni = round(pinf*n) # number of infected people
   iinf <- sample(1:n,ni) # randomly select the infectious people
   x[iinf] <- 2 # set those infected people to stage "2" (E->I)
-  
-  S <- E <- I <- R <- numeric(nt) ## set up storage for pop in each state
+  S <- E <- I <- R <- numeric(nt) #set up storage for pop in each state
   S[1] <- n-ni; I[1]<-ni
+  
+  for (i in 1:n){
+    probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
+    probij_r <- alpha[3]*probij
+  }
+
+ # it's JUST alpha_h for household, alpha_c for contacts
+ # alpha_r * probij — to be implemented tomorrow
+  
   
   # from LECTURE NOTES for inspiration
   for (i in 2:nt) { ## loop over days
