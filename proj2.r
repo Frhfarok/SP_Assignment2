@@ -8,11 +8,11 @@
 
 # 1. Household distribution
 
-set.seed(0)
-n <- 1000 # population test size
-hmax <- 5 # max household size
+set.seed(0) #random seed that all random operatins will produce same result
+n <- 1000 # population test size, in this case 1000 individuals in the simulation
+hmax <- 5 # max household size, 5 individuals per household
 h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE)) [1:n]
-    # n %/% hmax is the min num of households needed if all had hmax people
+    # n %/% hmax is the min number of households needed if all had hmax people, for 1000 people, that's 200
     # +1 to have extra households in case division is not exact
     # replace=TRUE allows repeated household sizes
     # [1:n] trims the vector to exactly n people
@@ -20,18 +20,17 @@ h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE)) [1:n]
 # 2.  Network of regular contacts
 
 # function to generate non-household contacts
-beta <- runif(n, 0, 1) #n vector of βi
+beta <- runif(n, 0, 1) #n vector of βi between 0 and 1
 get.net <- function(beta, h, nc = 15) {
-  # beta = 
-  #
-  #
+  # beta = sociability of each person
+  # h = household of each person
+  # nc = average number of non-household contacts per person
   n <- length(beta) # total number of people
   bm <- mean(beta) # mean of vector beta
   contacts <- vector("list", n) # create empty list for each person
   
   for (i in 1:n) {
     non_household <- which(h != h[i]) # identify people NOT in the same household as person i
-    
     probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1)) # probability links
     isampled <- runif(length(non_household)) < probij # randomly sample which non-householders to pick
     sampled <- non_household[isampled] # sampled non-householders
