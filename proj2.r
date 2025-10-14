@@ -106,23 +106,23 @@ beta_bar_vector <- rep(mean(beta_vector), n)
 
 par(mfrow = c(2, 2))
 
-# Scenario 1: Full Model with variable beta
+# Scenario 1: full model with variable beta
 alink_full <- get.net(beta = beta_vector, h = h_households)
 result_full <- nseir(beta = beta_vector, h = h_households, alink = alink_full)
 plot.nseir(result_full, "Scenario 1: Full Model (Variable Beta)")
 
-# Scenario 2: Random Mixing with variable beta
+# Scenario 2: random mixing with variable beta
 alpha_random_mixing <- c(0, 0, 0.02)
 result_random <- nseir(beta = beta_vector, h = h_households, alink = alink_full,
                        alpha = alpha_random_mixing)
 plot.nseir(result_random, "Scenario 2: Random Mixing (Variable Beta)")
 
-# Scenario 3: Full Model with constant beta
+# Scenario 3: full fodel with constant beta
 alink_homog <- get.net(beta = beta_bar_vector, h = h_households)
 result_homog <- nseir(beta = beta_bar_vector, h = h_households, alink = alink_homog)
 plot.nseir(result_homog, "Scenario 3: Full Model (Constant Beta)")
 
-# Scenario 4: Random Mixing with constant beta
+# Scenario 4: random mixing with constant beta
 result_rand_homog <- nseir(beta = beta_bar_vector, h = h_households, alink = alink_homog,
                            alpha = alpha_random_mixing)
 plot.nseir(result_rand_homog, "Scenario 4: Random Mixing (Constant Beta)")
