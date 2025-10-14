@@ -96,7 +96,7 @@ plot.nseir <- function(result, main_title) {
 }
 
 # 5. Scenario-based SEIR model comparison
-set.seed(42)
+set.seed(50)
 
 n <- 1000
 nt <- 100
