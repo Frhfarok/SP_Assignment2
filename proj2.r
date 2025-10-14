@@ -35,8 +35,6 @@ get.net <- function(beta, h, nc = 15) {
     isampled <- runif(length(non_household)) < probij # randomly sample which non-householders to pick
     sampled <- non_household[isampled] # sampled non-householders
     contacts[i] <- sampled
-    #contacts[[i]] <- sample(non_household, nc, probij) # sample contacts from non_household population with probability probij
-    
     }
   
   # make the link bidirectional
@@ -55,12 +53,23 @@ get.net <- function(beta, h, nc = 15) {
 # n = number of people
 # βi = sociability parameter for ith person
 # h = n vector of indicating which household the person belongs to
-# beta = n vector of βi; nt = number of days to simulate 
-# pinf = proportion of the initial population to *randomly* start in th eI state
+# beta = n vector of βi; 
+# nt = number of days to simulate 
+# pinf = proportion of the initial population to *randomly* start in the I state
 
 ## NOT FINISHED, To Be Completed
 alink = get.net(beta, h, nc = 15) # non-household contacts
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
+  
+  # calculate combined infection rate using alpha
+  for (i in 1:n){
+    probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
+    probij_h <- alpha[1]*probij
+    probij_c <- alpha[2]*probij
+    probij_r <- alpha[3]*probij
+    
+    
+  }
   
   ni = round(pinf*length(beta)) # number of infected people
   iinf <- sample(n,ni) # randomly select the infectious people
@@ -75,10 +84,14 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
     x[x==2 & u < delta] <- 3 ## I -> R with prob delta
     x[x==1 & u < gamma] <- 2 ## E -> I with prob gamma
     x[x==0 & u < beta*I[i-1]] <- 1 ## S -> E with prob beta*I[i-1]
-    S[i] <- sum(x==0); E[i] <- sum(x==1)
-    I[i] <- sum(x==2); R[i] <- sum(x==3)
+    S[i] <- sum(x==0) 
+    E[i] <- sum(x==1)
+    I[i] <- sum(x==2)
+    R[i] <- sum(x==3)
+  
+    
   }
-  return(list(S=S,E=E,I=I,R=R,t=beta))
+  return(list(S=S,E=E,I=I,R=R,t=1:nt))
 }
 
 # 4. Visualization of SEIR population states
