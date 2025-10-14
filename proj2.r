@@ -32,15 +32,11 @@ get.net <- function(beta, h, nc = 15) {
     probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1)) # probability links
     isampled <- runif(length(non_household)) < probij # randomly sample which non-householders to pick
     sampled <- non_household[isampled] # sampled non-householders
-<<<<<<< HEAD
-    contacts[i] <- sampled
     }
-=======
     contacts[[i]] <- sampled
     #contacts[[i]] <- sample(non_household, nc, probij) # sample contacts from non_household population with probability probij
-    
   }
->>>>>>> e39a72e5386561c1ddc9c2d15e0275bb46849213
+
   
   # make the link bidirectional
   # ensure if person i lists person j as a contact, then person j also lists person i as a contact
