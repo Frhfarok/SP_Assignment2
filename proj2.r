@@ -20,7 +20,9 @@ h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n]
 # function to generate non-household contacts
 beta <- runif(n, 0, 1) #n vector of βi
 get.net <- function(beta, h, nc = 15) {
-  # beta = sociability vector
+  # beta = sociability vector all individuals
+  # h = household membership vector
+  # nc = average number of non-household contacts per person
   n <- length(beta) # total number of people
   bm <- mean(beta) # mean of vector beta
   contacts <- vector("list", n) # create empty list for each person
@@ -45,7 +47,6 @@ get.net <- function(beta, h, nc = 15) {
       }}}
   return(contacts) 
 }
-
 
 # 3. SEIR model implementation
 # n = number of people
