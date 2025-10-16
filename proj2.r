@@ -5,7 +5,7 @@
 #  Farell Zevic (S2810226): Sections 4 and 5
 # ----------------------------------------------------------------
 
-# -------------- 1. Household distribution -----------------------
+# ------------------------ 1. Household distribution ---------------------------
 '
 n %/% hmax is the min num of households needed if all had hmax people
 +1 to have extra households in case division is not exact
@@ -18,7 +18,7 @@ hmax <- 5 # max household size
 h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n]
 
 
-# 2.  Network of regular contacts
+# ------------------------- 2.  Network of regular contacts --------------------
 # function to generate non-household contacts
 beta <- runif(n, 0, 1) #n vector of βi
 get.net <- function(beta, h, nc = 15) {
@@ -47,22 +47,21 @@ get.net <- function(beta, h, nc = 15) {
   return(contacts) 
 }
 
-# 3. SEIR model implementation
-# n = number of people
-# βi = sociability parameter for ith person
-# h = n vector of indicating which household the person belongs to
-# beta = n vector of βi; 
-# nt = number of days to simulate 
-# pinf = proportion of the initial population to *randomly* start in the I state
-
-## NOT FINISHED, To Be Completed
+# --------------------------- 3. SEIR model implementation ---------------------
+'
+n = number of people
+βi = sociability parameter for ith person
+h = n vector of indicating which household the person belongs to
+beta = n vector of βi; 
+nt = number of days to simulate 
+pinf = proportion of the initial population to *randomly* start in the I state
+'
 alink <- get.net(beta, h, nc = 15) # non-household contacts
-
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
   '
   calculate combined infection rate using alpha
-  check for each group of people if 
-  
+  Probability of NOT getting infected: Pnotinf = (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
+  Probability of getting infected: Pinf = 1 - Pnotinf = 1 - (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
   '
   
   bm <- mean(beta)
@@ -75,46 +74,57 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
   S[1] <- n-ni 
   I[1]<-ni
   
-  
-  
-  # infecting process to start the day after the initial infections happened
-  for (day in 2:nt){
-    
+  for (t in 2:nt){ # infecting process to start the day after the initial infections happened
     for (i in iinf){
-      
       household <- which(h == h[i])
-      
-      for (j in household){
-        if (x[j] == 0 && runif(1) < alpha[1]) {
-          x[j] <- 1
-        }
+      if (length(alink[[i]]) == 0 ) {
+        next
       }
-      
-      for (j in alink[[i]]){
-        if (x[j] == 0 && runif(1) < alpha[2]){
-          x[j] <- 1
-        }
-      }
-      
-      randmix <- setdiff(1:n,household, alink[[i]],i)
-      for (j in randmix){
-        probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
-        aprobij <- alpha*probij
+      else{
+        ipluscontacts <- c(alink[[i]],i)
+        randmix <- setdiff(1:n, c(household, ipluscontacts))
+        randmixsampled <- sample(randmix, nc)
+        alldaily <- c(household, alink[[i]], randmixsampled)
+        probh <- 0; probc <-0; probr <-0
         
-        if(x[j] == 0 && runif(1) < aprobij){
-          x[j] <- 1
+        for (j in alldaily){
+          
+          
+          if (x[j] == 0){
+            if (is.na(h[j])) {
+              next
+            }
+            else if (h[i] == h[j]){
+              probh <- alpha[1]
+            }
+            else if (j %in% alink[[i]]){
+              probc <- alpha[2]
+            }
+            probr <- alpha[3] * nc * beta[i] * beta[j] / (bm^2 * (n-1))
+            Pinf = 1 - (1-probh)*(1-probc)*(1-probr)
+            
+            if (runif(1) < Pinf) {
+              x[j] <- 1
+              }
+          }
         }
       }
     }
+    u <- runif(n)
+    x[x == 2 & u < delta] <- 3   # I -> R
+    x[x == 1 & u < gamma] <- 2   # E -> I
+    iinf <- which(x == 2)
+    
     S[t] <- sum(x == 0)
     E[t] <- sum(x == 1)
     I[t] <- sum(x == 2)
     R[t] <- sum(x == 3)
+    
   }
   return(list(S=S,E=E,I=I,R=R,t=1:nt))
 }
 
-# 4. Visualization of SEIR population states
+# ------------------ 4. Visualization of SEIR population states ----------------
 plot.nseir <- function(result, main_title) {
   n <- result$S[1] + result$E[1] + result$I[1] + result$R[1]
   
@@ -129,7 +139,7 @@ plot.nseir <- function(result, main_title) {
          col = c("blue", "orange", "red", "green"), lty = 1)
 }
 
-# 5. Scenario-based SEIR model comparison
+# ------------------ 5. Scenario-based SEIR model comparison -------------------
 set.seed(50)
 
 n <- 1000
