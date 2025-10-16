@@ -3,18 +3,20 @@
 #  Farah Nur Jannah Binti Farok (S2891743): Sections 1 and 2
 #  Marta Gorecka (S1866561): Sections 2 & 3
 #  Farell Zevic (S2810226): Sections 4 and 5
-############################################################
+# ----------------------------------------------------------------
 
-# 1. Household distribution
-
+# -------------- 1. Household distribution -----------------------
+'
+n %/% hmax is the min num of households needed if all had hmax people
++1 to have extra households in case division is not exact
+replace=TRUE allows repeated household sizes
+[1:n] trims the vector to exactly n people
+'
 set.seed(0)
 n <- 1000 # population test size
 hmax <- 5 # max household size
 h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n]
-# n %/% hmax is the min num of households needed if all had hmax people
-# +1 to have extra households in case division is not exact
-# replace=TRUE allows repeated household sizes
-# [1:n] trims the vector to exactly n people
+
 
 # 2.  Network of regular contacts
 # function to generate non-household contacts
@@ -57,7 +59,11 @@ get.net <- function(beta, h, nc = 15) {
 alink <- get.net(beta, h, nc = 15) # non-household contacts
 
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
-  # calculate combined infection rate using alpha
+  '
+  calculate combined infection rate using alpha
+  check for each group of people if 
+  
+  '
   
   bm <- mean(beta)
   n <- length(beta)
@@ -66,28 +72,44 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
   iinf <- sample(1:n,ni) # randomly select the infectious people
   x[iinf] <- 2 # set those infected people to stage "2" (E->I)
   S <- E <- I <- R <- numeric(nt) #set up storage for pop in each state
-  S[1] <- n-ni; I[1]<-ni
-  
-  for (i in 1:n){
-    probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
-    probij_r <- alpha[3]*probij
-  }
-
- # it's JUST alpha_h for household, alpha_c for contacts
- # alpha_r * probij — to be implemented tomorrow
+  S[1] <- n-ni 
+  I[1]<-ni
   
   
-  # from LECTURE NOTES for inspiration
-  for (i in 2:nt) { ## loop over days
-    u <- runif(n) ## uniform random deviates
-    x[x==2 & u < delta] <- 3 ## I -> R with prob delta
-    x[x==1 & u < gamma] <- 2 ## E -> I with prob gamma
-    x[x==0 & u < beta*I[i-1]] <- 1 ## S -> E with prob beta*I[i-1]
-    S[i] <- sum(x==0) 
-    E[i] <- sum(x==1)
-    I[i] <- sum(x==2)
-    R[i] <- sum(x==3)
-
+  
+  # infecting process to start the day after the initial infections happened
+  for (day in 2:nt){
+    
+    for (i in iinf){
+      
+      household <- which(h == h[i])
+      
+      for (j in household){
+        if (x[j] == 0 && runif(1) < alpha[1]) {
+          x[j] <- 1
+        }
+      }
+      
+      for (j in alink[[i]]){
+        if (x[j] == 0 && runif(1) < alpha[2]){
+          x[j] <- 1
+        }
+      }
+      
+      randmix <- setdiff(1:n,household, alink[[i]],i)
+      for (j in randmix){
+        probij <- nc * beta[i] * beta[non_household] / (bm^2 * (n-1))
+        aprobij <- alpha*probij
+        
+        if(x[j] == 0 && runif(1) < aprobij){
+          x[j] <- 1
+        }
+      }
+    }
+    S[t] <- sum(x == 0)
+    E[t] <- sum(x == 1)
+    I[t] <- sum(x == 2)
+    R[t] <- sum(x == 3)
   }
   return(list(S=S,E=E,I=I,R=R,t=1:nt))
 }
