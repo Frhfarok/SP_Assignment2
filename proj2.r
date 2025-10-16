@@ -203,3 +203,16 @@ plot.nseir(result_rand_homog, "Scenario 4: Random Mixing (Constant Beta)") #plot
 
 par(mfrow = c(1, 1)) #to reset the plotting environment to 4 plots in one frame layout after all is complete
 
+#short description about the plots
+#1. full model (variable beta), this represents the most limited epidemic. the susceptible curve (blue line) drops th least,
+#as social structure and individual variability effectiverly contain the spread
+
+#2. random mixing (variable beta), this represents the epidemic is larger and slower than the full model.
+#removing the social structure for random mixing allows the infection to spread more broadly, 
+#though individual variability still limits the final size
+
+#3. full model (constant beta), this represents the epidemic is faster and broader epidemic than the full model (variable beta). 
+#removing sociability variability means more individuals contribute equally to transmission, increasing the speed and reach, despite the existing social structure
+
+#4. random mixing (constant beta), this represents the most severe and widespread scenario. 
+#lacking both social structure and individual variability, the infection spreads uniformly, resulting in the highest peak and infecting nearly the entire population
