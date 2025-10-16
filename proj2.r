@@ -6,12 +6,11 @@
 # ----------------------------------------------------------------
 
 # ------------------------ 1. Household distribution ---------------------------
-'
-n %/% hmax is the min num of households needed if all had hmax people
-+1 to have extra households in case division is not exact
-replace=TRUE allows repeated household sizes
-[1:n] trims the vector to exactly n people
-'
+# n %/% hmax is the min num of households needed if all had hmax people
+# +1 to have extra households in case division is not exact
+# replace=TRUE allows repeated household sizes
+# [1:n] trims the vector to exactly n people
+
 set.seed(0)
 n <- 1000 # population test size
 hmax <- 5 # max household size
@@ -48,21 +47,23 @@ get.net <- function(beta, h, nc = 15) {
 }
 
 # --------------------------- 3. SEIR model implementation ---------------------
-'
-n = number of people
-βi = sociability parameter for ith person
-h = n vector of indicating which household the person belongs to
-beta = n vector of βi; 
-nt = number of days to simulate 
-pinf = proportion of the initial population to *randomly* start in the I state
-'
+# n = number of people
+# βi = sociability parameter for ith person
+# h = n vector of indicating which household the person belongs to
+# beta = n vector of βi; 
+# nt = number of days to simulate 
+# pinf = proportion of the initial population to *randomly* start in the I state'
+
 alink <- get.net(beta, h, nc = 15) # non-household contacts
 nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15, nt = 100, pinf = .005) {
-  '
-  calculate combined infection rate using alpha
-  Probability of NOT getting infected: Pnotinf = (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
-  Probability of getting infected: Pinf = 1 - Pnotinf = 1 - (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
-  '
+
+# calculate combined infection rate using alpha
+# Find the total pool of people that could be encountered daily.
+# Assign probabilities depending on which group they are from.
+# Get the total probability:
+# Probability of NOT getting infected: Pnotinf = (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
+# Probability of getting infected: Pinf = 1 - Pnotinf = 1 - (1-alpha_h)*(1-alpha_c)*(1-alpha_r)
+# Update SEIR states
   
   bm <- mean(beta)
   n <- length(beta)
@@ -71,38 +72,35 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
   iinf <- sample(1:n,ni) # randomly select the infectious people
   x[iinf] <- 2 # set those infected people to stage "2" (E->I)
   S <- E <- I <- R <- numeric(nt) #set up storage for pop in each state
-  S[1] <- n-ni 
-  I[1]<-ni
+  S[1] <- n-ni # initial susceptible people = all - infected
+  I[1]<-ni # initial infected people
   
   for (t in 2:nt){ # infecting process to start the day after the initial infections happened
     for (i in iinf){
       household <- which(h == h[i])
-      if (length(alink[[i]]) == 0 ) {
+      if (length(alink[[i]]) == 0 ) { # pretty sure NA shouldn't appear at all, but I couldn't figure out how to fix it
         next
       }
       else{
         ipluscontacts <- c(alink[[i]],i)
         randmix <- setdiff(1:n, c(household, ipluscontacts))
-        randmixsampled <- sample(randmix, nc)
-        alldaily <- c(household, alink[[i]], randmixsampled)
-        probh <- 0; probc <-0; probr <-0
+        randmixsampled <- sample(randmix, nc) 
+        alldaily <- c(household, alink[[i]], randmixsampled) # all people person i might encounter
+        probh <- 0; probc <-0; probr <-0 # reset probabilities after every run
         
         for (j in alldaily){
-          
-          
           if (x[j] == 0){
-            if (is.na(h[j])) {
+            if (is.na(h[j])){
               next
             }
             else if (h[i] == h[j]){
-              probh <- alpha[1]
+              probh <- alpha[1] # household
             }
             else if (j %in% alink[[i]]){
-              probc <- alpha[2]
+              probc <- alpha[2] # contacts 
             }
-            probr <- alpha[3] * nc * beta[i] * beta[j] / (bm^2 * (n-1))
-            Pinf = 1 - (1-probh)*(1-probc)*(1-probr)
-            
+            probr <- alpha[3] * nc * beta[i] * beta[j] / (bm^2 * (n-1)) # random mixing
+            Pinf = 1 - (1-probh)*(1-probc)*(1-probr) # calculate total probability 
             if (runif(1) < Pinf) {
               x[j] <- 1
               }
@@ -113,9 +111,10 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
     u <- runif(n)
     x[x == 2 & u < delta] <- 3   # I -> R
     x[x == 1 & u < gamma] <- 2   # E -> I
-    iinf <- which(x == 2)
+    iinf <- which(x == 2) # update infected people
     
-    S[t] <- sum(x == 0)
+    # store number of people in each state
+    S[t] <- sum(x == 0) 
     E[t] <- sum(x == 1)
     I[t] <- sum(x == 2)
     R[t] <- sum(x == 3)
@@ -156,7 +155,7 @@ result_full <- nseir(beta = beta_vector, h = h_households, alink = alink_full)
 plot.nseir(result_full, "Scenario 1: Full Model (Variable Beta)")
 
 # Scenario 2: random mixing with variable beta
-alpha_random_mixing <- c(0, 0, 0.02)
+alpha_random_mixing <- c(0, 0, 0.4)
 result_random <- nseir(beta = beta_vector, h = h_households, alink = alink_full,
                        alpha = alpha_random_mixing)
 plot.nseir(result_random, "Scenario 2: Random Mixing (Variable Beta)")
