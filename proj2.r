@@ -151,8 +151,8 @@ plot.nseir <- function(result, main_title) {
   lines(result$t, result$I / n, col = "red") #the infectious (I) population proportion over time as a red line
   lines(result$t, result$R / n, col = "green") #the recovered (R) population proportion over time as a green line
   
-  legend("bottomright", legend = c("S", "E", "I", "R"), #legend to the bottom-right corner of the plot
-         col = c("blue", "orange", "red", "green"), lty = 1) #color of the state line for the legend
+  legend("topright", legend = c("S", "E", "I", "R"), #legend to the top-right corner of the plot
+         col = c("blue", "orange", "red", "green"), lty = 1, cex = 0.2) #color of the state line for the legend
 }
 
 # ------------------ 5. Scenario-based SEIR model comparison -------------------
