@@ -1,7 +1,7 @@
 #  Statistical Programming Group Project 2
 #  Group 18 Members and Contributions:
 #  Farah Nur Jannah Binti Farok (S2891743): Sections 1 and 2
-#  Marta Gorecka (S1866561): Sections 2 & 3
+#  Marta Gorecka (S1866561): Sections 2 and 3
 #  Farell Zevic (S2810226): Sections 4 and 5
 
 # ----------------------------------------------------------------
@@ -14,7 +14,7 @@
 #  2. Generate a network of non-household contacts based on sociability.
 #  3. Simulate SEIR dynamics over time.
 #  4. Visualize proportions of Susceptible, Exposed, Infectious, and Recovered individuals.
-#  5. Compare four scenarios combining heterogeneous/constant sociability and random/full mixing.
+#  5. Compare four scenarios that combine heterogeneous/constant sociability and random/full mixing.
 
 
 # ------------------------ 1. Household distribution ---------------------------
@@ -135,50 +135,71 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
 }
 
 # ------------------ 4. Visualization of SEIR population states ----------------
+#define the plotting function, accepting the result list from nseir and a main string
 plot.nseir <- function(result, main_title) {
-  n <- result$S[1] + result$E[1] + result$I[1] + result$R[1]
-  
+  #calculate the total population n by summing the initial counts of all states
+  n <- result$S[1] + result$E[1] + result$I[1] + result$R[1] 
+
+  #start the plot
+  #x axis is the time (result$t)
+  #y axis is the susceptible population (result$S) divided by n to show proportion
   plot(result$t, result$S / n, type = "l", col = "blue",
        xlab = "Day", ylab = "Proportion of Population",
        ylim = c(0, 1), main = main_title)
-  lines(result$t, result$E / n, col = "orange")
-  lines(result$t, result$I / n, col = "red")
-  lines(result$t, result$R / n, col = "green")
+  #make line and coloring the plot
+  lines(result$t, result$E / n, col = "orange") #the exposed (E) population proportion over time as an orange line
+  lines(result$t, result$I / n, col = "red") #the infectious (I) population proportion over time as a red line
+  lines(result$t, result$R / n, col = "green") #the recovered (R) population proportion over time as a green line
   
-  legend("right", legend = c("S", "E", "I", "R"),
-         col = c("blue", "orange", "red", "green"), lty = 1)
+  legend("bottomright", legend = c("S", "E", "I", "R"), #legend to the bottom-right corner of the plot
+         col = c("blue", "orange", "red", "green"), lty = 1) #color of the state line for the legend
 }
 
 # ------------------ 5. Scenario-based SEIR model comparison -------------------
 set.seed(50)
+#ensures that the random processes (like initial infected people, sociability beta values, 
+#and daily infection probabilities) are consistent every time the code is run, 
+#making the simulation results reproducible
 
-n <- 1000
-nt <- 100
-beta_vector <- runif(n, 0, 1)
+n <- 1000 #population size
+nt <- 100 #time period (100 days)
+
+beta_vector <- runif(n, 0, 1) 
+#n-vector of sociability parameters (beta_i) for each person, drawn from a uniform U(0, 1) distribution. 
+#this vector is used in scenarios 1 and 2 (variable beta)
+
 h_households <- rep(1:(n %/% 5 + 1), sample(1:5, n %/% 5 + 1, replace=TRUE)) [1:n]
+#regenerate the household membership vector 'h' using the user's preferred, 
+#although potentially imperfect, one-line code
+#this is used for all scenarios requiring household structure (1 and 3)
+
 beta_bar_vector <- rep(mean(beta_vector), n)
+#create a new n-vector where every element is set to the mean of the original beta_vector
+#this represents the homogeneous sociability case and is used in scenarios 3 and 4 (constant beta)
 
 par(mfrow = c(2, 2))
+#configure the plotting environment to display 2 rows and 2 columns of plots (4 plots in one frame)
 
-# Scenario 1: full model with variable beta
-alink_full <- get.net(beta = beta_vector, h = h_households)
-result_full <- nseir(beta = beta_vector, h = h_households, alink = alink_full)
-plot.nseir(result_full, "Scenario 1: Full Model (Variable Beta)")
+#scenario 1: full model with variable beta
+alink_full <- get.net(beta = beta_vector, h = h_households) #the regular contact network using the variable beta_vector and household structure 'h
+result_full <- nseir(beta = beta_vector, h = h_households, alink = alink_full) #run the nseir simulation using the full structure: variable beta, household, and network (default alpha values)
+plot.nseir(result_full, "Scenario 1: Full Model (Variable Beta)") #plot results
 
-# Scenario 2: random mixing with variable beta
-alpha_random_mixing <- c(0, 0, 0.4)
+#scenario 2: random mixing with variable beta
+alpha_random_mixing <- c(0, 0, 0.4) #the alpha vector for random mixing: alpha_h=0, alpha_c=0, and alpha_r=0.04
 result_random <- nseir(beta = beta_vector, h = h_households, alink = alink_full,
-                       alpha = alpha_random_mixing)
-plot.nseir(result_random, "Scenario 2: Random Mixing (Variable Beta)")
+                       alpha = alpha_random_mixing) #run the nseir simulation using the variable beta, but with household and network transmission probabilities set to zero (pure random mixing)
+plot.nseir(result_random, "Scenario 2: Random Mixing (Variable Beta)") #plot results
 
-# Scenario 3: full fodel with constant beta
-alink_homog <- get.net(beta = beta_bar_vector, h = h_households)
-result_homog <- nseir(beta = beta_bar_vector, h = h_households, alink = alink_homog)
-plot.nseir(result_homog, "Scenario 3: Full Model (Constant Beta)")
+#scenario 3: full fodel with constant beta
+alink_homog <- get.net(beta = beta_bar_vector, h = h_households) #a new regular contact network using the constant beta_bar_vector (homogeneous sociability)
+result_homog <- nseir(beta = beta_bar_vector, h = h_households, alink = alink_homog) #run the nseir simulation with the full structure, but with constant sociability (beta_bar_vector)
+plot.nseir(result_homog, "Scenario 3: Full Model (Constant Beta)") #plot results
 
-# Scenario 4: random mixing with constant beta
+#scenario 4: random mixing with constant beta
 result_rand_homog <- nseir(beta = beta_bar_vector, h = h_households, alink = alink_homog,
-                           alpha = alpha_random_mixing)
-plot.nseir(result_rand_homog, "Scenario 4: Random Mixing (Constant Beta)")
-par(mfrow = c(1, 1))
+                           alpha = alpha_random_mixing) #run the nseir simulation with constant sociability and pure random mixing (combining the conditions of Scenarios 2 and 3)
+plot.nseir(result_rand_homog, "Scenario 4: Random Mixing (Constant Beta)") #plot results
+
+par(mfrow = c(1, 1)) #to reset the plotting environment to 4 plots in one frame layout after all is complete
 
