@@ -3,18 +3,29 @@
 #  Farah Nur Jannah Binti Farok (S2891743): Sections 1 and 2
 #  Marta Gorecka (S1866561): Sections 2 & 3
 #  Farell Zevic (S2810226): Sections 4 and 5
+
 # ----------------------------------------------------------------
 
+#  Code to simulate an SEIR epidemic model on a population network.
+#  The population is divided into households, and each person also has a set of non-household contacts. 
+#  Transmission can occur through household, close contact, or random mixing.
+#  The code implements the following components:
+#  1. Generate household assignments for each person.
+#  2. Generate a network of non-household contacts based on sociability.
+#  3. Simulate SEIR dynamics over time.
+#  4. Visualize proportions of Susceptible, Exposed, Infectious, and Recovered individuals.
+#  5. Compare four scenarios combining heterogeneous/constant sociability and random/full mixing.
+
+
 # ------------------------ 1. Household distribution ---------------------------
-# n %/% hmax is the min num of households needed if all had hmax people
-# +1 to have extra households in case division is not exact
-# replace=TRUE allows repeated household sizes
-# [1:n] trims the vector to exactly n people
+#  Each person in the population belongs to a household.
+#  Household sizes are uniformly distributed between 1 and hmax.
+#  The vector h indicates which household each person belongs to; people with the same household number(ID) live in the same household.
 
 set.seed(0)
 n <- 1000 # population test size
 hmax <- 5 # max household size
-h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n]
+h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n] # generate household IDs with sizes uniformly distributed between 1 and hmax
 
 
 # ------------------------- 2.  Network of regular contacts --------------------
