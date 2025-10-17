@@ -88,7 +88,7 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
   for (t in 2:nt){ # infecting process to start the day after the initial infections happened
     for (i in iinf){
       household <- which(h == h[i])
-      if (length(alink[[i]]) == 0 ) { # pretty sure NA shouldn't appear at all, but I couldn't figure out how to fix it
+      if (length(alink[[i]]) == 0 ) { 
         next
       }
       else{
