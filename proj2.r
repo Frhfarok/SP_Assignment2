@@ -25,7 +25,7 @@
 set.seed(0)
 n <- 1000 # population test size
 hmax <- 5 # max household size
-h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n] # generate household IDs with sizes uniformly distributed between 1 and hmax
+h <- rep(1:(n %/% hmax + 1), sample(1:hmax, n %/% hmax + 1, replace=TRUE))[1:n] # generate household IDs 
 
 
 # ------------------------- 2.  Network of regular contacts --------------------
@@ -49,8 +49,7 @@ get.net <- function(beta, h, nc = 15) {
   # make the link bidirectional
   # ensure if person i lists person j as a contact, then person j also lists person i as a contact
   for (i in 1:n) {
-    for (j in contacts[[i]] ) {
-      # check if the reverse link (j -> i) already exists
+    for (j in contacts[[i]] ) { 
       if (! (i %in% contacts[[j]]) ) { 
         contacts[[j]] <- c(contacts[[j]], i) # add i to j's contact list if bidirectional link does not exist
       }}}
