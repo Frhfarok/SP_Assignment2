@@ -3,6 +3,7 @@
 #  Farah Nur Jannah Binti Farok (S2891743): Sections 1 and 2
 #  Marta Gorecka (S1866561): Sections 2 and 3
 #  Farell Zevic (S2810226): Sections 4 and 5
+#Github Repo Link: https://github.com/Frhfarok/SP_Assignment2/blob/main/proj2.r
 
 # ----------------------------------------------------------------
 
