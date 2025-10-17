@@ -119,8 +119,8 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
       }
     }
     u <- runif(n)
-    x[x == 2 & u < delta] <- 3   # I -> R
-    x[x == 1 & u < gamma] <- 2   # E -> I
+    x[x == 2 & u < gamma] <- 3   # I -> R
+    x[x == 1 & u < delta] <- 2   # E -> I
     iinf <- which(x == 2) # update infected people
     
     # store number of people in each state
@@ -185,7 +185,7 @@ result_full <- nseir(beta = beta_vector, h = h_households, alink = alink_full) #
 plot.nseir(result_full, "Scenario 1: Full Model (Variable Beta)") #plot results
 
 #scenario 2: random mixing with variable beta
-alpha_random_mixing <- c(0, 0, 0.4) #the alpha vector for random mixing: alpha_h=0, alpha_c=0, and alpha_r=0.04
+alpha_random_mixing <- c(0, 0, 0.04) #the alpha vector for random mixing: alpha_h=0, alpha_c=0, and alpha_r=0.04
 result_random <- nseir(beta = beta_vector, h = h_households, alink = alink_full,
                        alpha = alpha_random_mixing) #run the nseir simulation using the variable beta, but with household and network transmission probabilities set to zero (pure random mixing)
 plot.nseir(result_random, "Scenario 2: Random Mixing (Variable Beta)") #plot results
