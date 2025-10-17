@@ -119,8 +119,8 @@ nseir <- function(beta, h, alink, alpha=c(.1,.01,.01), delta=.2, gamma=.4, nc=15
       }
     }
     u <- runif(n)
-    x[x == 2 & u < gamma] <- 3   # I -> R
-    x[x == 1 & u < delta] <- 2   # E -> I
+    x[x == 2 & u < delta] <- 3   # I -> R
+    x[x == 1 & u < gamma] <- 2   # E -> I
     iinf <- which(x == 2) # update infected people
     
     # store number of people in each state
